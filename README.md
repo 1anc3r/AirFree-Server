@@ -20,7 +20,8 @@ Her name is not initially called AirFree, I call her AirFree because AirFree and
 ## Demo
 
 ### Server
-<img src="http://o7gy5l0ax.bkt.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160520200125.png" width = "432" height = "768" alt="File Management" />
+<img src="http://o7gy5l0ax.bkt.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160520200125.png" width = "222" height = "269" alt="File Management" />
+
 Demo Download: [TBD](www.1anc3r.me)
 
 ## About Me
