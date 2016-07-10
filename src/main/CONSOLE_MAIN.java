@@ -34,6 +34,7 @@ public class CONSOLE_MAIN {
 	final private Integer port = new Integer(59672);
 	private String readName, sendName;
 	private List<String> filelist = new ArrayList<>();
+	private ServerSocket serverSocket;
 
 	public CONSOLE_MAIN() throws IOException, JSONException {
 
@@ -103,9 +104,9 @@ public class CONSOLE_MAIN {
 		});
 
 		InetAddress ip = InetAddress.getLocalHost();
-		String text = ip.getHostAddress();
+//		String text = ip.getHostAddress();
 		System.out.println(ip.getHostAddress());
-		ServerSocket serverSocket = new ServerSocket(59671);
+		serverSocket = new ServerSocket(59671);
 		System.out.println("服务器创建成功!");
 
 		while (true) {
@@ -137,7 +138,7 @@ public class CONSOLE_MAIN {
 			ip = parameter;
 		} else if (command.equals("computer")) {
 			filelist.clear();
-			if (parameter.equals("My Computer")) {
+			if (parameter.equals("this PC")) {
 				File[] parts = File.listRoots();
 				for (File part : parts) {
 					filelist.add(part.getAbsolutePath());
