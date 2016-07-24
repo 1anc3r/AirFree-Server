@@ -107,49 +107,31 @@ public class CONSOLE_MAIN {
 			}
 		});
 
-		new Thread() {
-			public void run() {
-				try {
-					if (makeDirs(".\\screenshot") && makeDirs(".\\download")
-							&& makeDirs(".\\inetaddress")) {
-						InetAddress ip;
-						ip = InetAddress.getLocalHost();
-						System.out.println(ip.getHostAddress());
-						serverSocket = new ServerSocket(59671);
-						new PrintThread();
-						System.out.println("服务端创建成功!");
+		try {
+			if (makeDirs(".\\screenshot") && makeDirs(".\\download")
+					&& makeDirs(".\\inetaddress")) {
+				InetAddress ip;
+				ip = InetAddress.getLocalHost();
+				System.out.println(ip.getHostAddress());
+				serverSocket = new ServerSocket(59671);
+				new PrintThread();
+				System.out.println("服务端创建成功!");
 
-						while (true) {
-							Socket socket = serverSocket.accept();
-							os = socket.getOutputStream();
-							socketList.add(socket);
-							new ServerThread(socket);
-							System.out.println("客户端连接成功!");
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-					String msg = e.getMessage();
-					if (msg.contains("Address already in use")) {
-						JOptionPane.showMessageDialog(null, "服务端创建失败 : 端口被占用");
-					}
+				while (true) {
+					Socket socket = serverSocket.accept();
+					os = socket.getOutputStream();
+					socketList.add(socket);
+					new ServerThread(socket);
+					System.out.println("客户端连接成功!");
 				}
 			}
-		}.start();
-
-		// InetAddress ip = InetAddress.getLocalHost();
-		// System.out.println(ip.getHostAddress());
-		// serverSocket = new ServerSocket(59671);
-		// new PrintThread();
-		// System.out.println("服务端创建成功!");
-		//
-		// while (true) {
-		// Socket socket = serverSocket.accept();
-		// os = socket.getOutputStream();
-		// socketList.add(socket);
-		// new ServerThread(socket);
-		// System.out.println("客户端连接成功!");
-		// }
+		} catch (IOException e) {
+			e.printStackTrace();
+			String msg = e.getMessage();
+			if (msg.contains("Address already in use")) {
+				JOptionPane.showMessageDialog(null, "服务端创建失败 : 端口被占用");
+			}
+		}
 	}
 
 	private void AnalyzeCode(String command, String parameter)
@@ -241,14 +223,13 @@ public class CONSOLE_MAIN {
 					SwingUtilities.invokeLater(readRun);
 				}
 			}).start();
+		} else if (command.equals("talk")) {
+			System.out.print(parameter);
+			for (Socket item : socketList) {
+				OutputStream itemOs = item.getOutputStream();
+				itemOs.write(("" + parameter).getBytes("utf-8"));
+			}
 		}
-		// else if (command.equals("talk")) {
-		// System.out.print(parameter);
-		// for (Socket item : socketList) {
-		// OutputStream itemOs = item.getOutputStream();
-		// itemOs.write(("" + parameter).getBytes("utf-8"));
-		// }
-		// }
 		os.flush();
 	}
 
@@ -307,6 +288,7 @@ public class CONSOLE_MAIN {
 	class ServerThread extends Thread {
 
 		private Socket client;
+		private OutputStream os_;
 		private BufferedReader br;
 		int first = 1;
 
@@ -314,6 +296,7 @@ public class CONSOLE_MAIN {
 			try {
 				client = socket;
 				client.getOutputStream();
+				os_ = socket.getOutputStream();
 				br = new BufferedReader(new InputStreamReader(
 						socket.getInputStream(), "utf-8"));
 				start();
@@ -330,9 +313,29 @@ public class CONSOLE_MAIN {
 		}
 
 		public void sendMessage(String msg) {
-			// os.write((msg + "\n").getBytes("utf-8"));
-			// os.flush();
-			CONSOLE_MAIN.this.sendMessage("talk", msg);
+			try {
+				// os_.write((msg).getBytes("utf-8"));
+				if (os_ != null) {
+					try {
+						JSONObject jb_ = new JSONObject();
+						System.out.println("发送成功:"
+								+ "{\"command\":\"talk\",\"parameter\":\""
+								+ msg + "\"}");
+						os_.write(("{\"command\":\"talk\",\"parameter\":\""
+								+ msg + "\"}" + "\n").getBytes("utf-8"));
+						os_.flush();
+					} catch (Exception e) {
+						System.out.println("发送异常:" + e.getMessage());
+					}
+				}
+				os_.flush();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		public void run() {
