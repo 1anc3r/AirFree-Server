@@ -28,7 +28,7 @@ The poject's name isn't called AirFree initially, because AirFree and Alfred hom
 ### Server
 <img src="http://o7gy5l0ax.bkt.clouddn.com/QQ%E6%88%AA%E5%9B%BE20160520200125.png" width = "222" height = "269" alt="File Management" />
 
-Demo Download: [AirFree-Server.exe](http://pan.baidu.com/s/1c1AQwCw)
+Demo Download: [AirFree-Server.exe](http://pan.baidu.com/s/1gfx3GdX)
 
 ## About Me
 A student of Xi'an University of Posts and Telecommunications in mainland China. Currently learning Android development.
