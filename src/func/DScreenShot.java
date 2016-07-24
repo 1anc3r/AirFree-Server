@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 import util.Networking;
 
 public class DScreenShot {
-	private String ip, name, fileName, defaultFileName = ".\\screenshot\\screenshot";
+	private String name, fileName, defaultFileName = ".\\screenshot\\screenshot";
 	private String imageFormat;
 	private String defaultImageFormat = "png";
 	Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
@@ -28,7 +28,6 @@ public class DScreenShot {
 		sendRun = (new Runnable() {
 			public void run() {
 				Integer port = new Integer(59672);
-				System.out.println(ip+ ":"+port);
 				boolean failed = false;
 				try {
 					Networking.do_write(ip, port, name);
@@ -48,13 +47,13 @@ public class DScreenShot {
 
 		sendSuccess = (new Runnable() {
 			public void run() {
-				System.out.println("接收成功!");
+				System.out.println("接收成功:"+"{\"parameter\":\""+name+"\",\"command\":\"screenshot\"}");
 			}
 		});
 
 		sendFail = (new Runnable() {
 			public void run() {
-				System.out.println("接收失败!");
+				System.out.println("接收失败:"+"{\"parameter\":\""+name+"\",\"command\":\"screenshot\"}");
 			}
 		});
 		

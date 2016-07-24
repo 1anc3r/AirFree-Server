@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -128,7 +127,6 @@ public class QRCodeUtil {
 		BufferedImage image = QRCodeUtil.createImage(content, imgPath,
 				needCompress);
 		mkdirs(destPath);
-		String file = new Random().nextInt(99999999)+".jpg";
 		ImageIO.write(image, FORMAT_NAME, new File(destPath+"/"+filename));
 	}
 

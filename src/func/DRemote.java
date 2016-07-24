@@ -7,11 +7,7 @@ import java.util.List;
 
 public class DRemote {
 
-	private String parameter;
-
 	public DRemote(String parameter) throws IOException {
-		this.parameter = parameter;
-
 		if (parameter.equals("1")) {
 			Runtime.getRuntime().exec("cmd /k start cmd");
 		} else if (parameter.equals("-1")) {

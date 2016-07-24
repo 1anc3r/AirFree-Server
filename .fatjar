@@ -1,10 +1,10 @@
 #Fat Jar Configuration File
-#Mon May 16 22:02:53 CST 2016
+#Sun Jul 10 17:06:05 CST 2016
 onejar.license.required=false
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=true
-jarname=F\:\\Distance_fat.jar
+jarname=F\:\\AirFree.jar
 manifest.mergeall=true
 manifest.mainclass=main.GUI_MAIN
 manifest.file=<createnew>

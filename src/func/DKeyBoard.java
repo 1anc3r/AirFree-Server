@@ -1,19 +1,14 @@
 package func;
 import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Robot;
 import java.awt.Toolkit;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 public class DKeyBoard {
-	private Dimension dimen;
 	private Robot robot;
 
 	public DKeyBoard() {
-		dimen = Toolkit.getDefaultToolkit().getScreenSize();
+		Toolkit.getDefaultToolkit().getScreenSize();
 		try {
 			robot = new Robot();
 		} catch (AWTException e) {

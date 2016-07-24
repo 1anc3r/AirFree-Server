@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.json.JSONException;
@@ -24,17 +25,20 @@ public class CONSOLE_MAIN {
 
 	private String ip = "";
 	private OutputStream os;
+	private static ServerSocket serverSocket;
 	public static ArrayList<Socket> socketList = new ArrayList<Socket>();
+	final private Integer port = new Integer(59672);
 	final private Runnable readRun;
 	final private Runnable readSuccess;
 	final private Runnable readFail;
 	final private Runnable sendRun;
 	final private Runnable sendSuccess;
 	final private Runnable sendFail;
-	final private Integer port = new Integer(59672);
 	private String readName, sendName;
-	private List<String> filelist = new ArrayList<>();
-	private ServerSocket serverSocket;
+	private static boolean isPrint = false;
+	private static List<String> fileList = new ArrayList<>();
+	private static LinkedList<String> messageList = new LinkedList<>();
+	private static List<ServerThread> threadsList = new ArrayList<>();
 
 	public CONSOLE_MAIN() throws IOException, JSONException {
 
@@ -103,33 +107,49 @@ public class CONSOLE_MAIN {
 			}
 		});
 
-		InetAddress ip = InetAddress.getLocalHost();
-//		String text = ip.getHostAddress();
-		System.out.println(ip.getHostAddress());
-		serverSocket = new ServerSocket(59671);
-		System.out.println("服务器创建成功!");
+		new Thread() {
+			public void run() {
+				try {
+					if (makeDirs(".\\screenshot") && makeDirs(".\\download")
+							&& makeDirs(".\\inetaddress")) {
+						InetAddress ip;
+						ip = InetAddress.getLocalHost();
+						System.out.println(ip.getHostAddress());
+						serverSocket = new ServerSocket(59671);
+						new PrintThread();
+						System.out.println("服务端创建成功!");
 
-		while (true) {
-			Socket socket = serverSocket.accept();
-			os = socket.getOutputStream();
-			System.out.println("客户端连接成功!");
-			socketList.add(socket);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					socket.getInputStream(), "utf-8"));
-			try {
-				String content = null;
-				while ((content = reader.readLine()) != null) {
-					System.out.println(content);
-					JSONTokener jt = new JSONTokener(content);
-					JSONObject jb = (JSONObject) jt.nextValue();
-					String command = jb.getString("command");
-					String parameter = jb.getString("parameter");
-					AnalyzeCode(command, parameter);
+						while (true) {
+							Socket socket = serverSocket.accept();
+							os = socket.getOutputStream();
+							socketList.add(socket);
+							new ServerThread(socket);
+							System.out.println("客户端连接成功!");
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					String msg = e.getMessage();
+					if (msg.contains("Address already in use")) {
+						JOptionPane.showMessageDialog(null, "服务端创建失败 : 端口被占用");
+					}
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
-		}
+		}.start();
+
+		// InetAddress ip = InetAddress.getLocalHost();
+		// System.out.println(ip.getHostAddress());
+		// serverSocket = new ServerSocket(59671);
+		// new PrintThread();
+		// System.out.println("服务端创建成功!");
+		//
+		// while (true) {
+		// Socket socket = serverSocket.accept();
+		// os = socket.getOutputStream();
+		// socketList.add(socket);
+		// new ServerThread(socket);
+		// System.out.println("客户端连接成功!");
+		// }
 	}
 
 	private void AnalyzeCode(String command, String parameter)
@@ -137,12 +157,11 @@ public class CONSOLE_MAIN {
 		if (command.equals("link")) {
 			ip = parameter;
 		} else if (command.equals("computer")) {
-			filelist.clear();
+			fileList.clear();
 			if (parameter.equals("this PC")) {
 				File[] parts = File.listRoots();
 				for (File part : parts) {
-					filelist.add(part.getAbsolutePath());
-					System.out.println(part.getAbsolutePath());
+					fileList.add(part.getAbsolutePath());
 				}
 			} else if (parameter.contains("iwanna:")) {
 				sendName = parameter.replaceAll("iwanna:", "");
@@ -158,25 +177,27 @@ public class CONSOLE_MAIN {
 				if (path.isDirectory()) {
 					File[] parts = path.listFiles();
 					for (File part : parts) {
-						filelist.add(part.getAbsolutePath());
-						System.out.println(part.getAbsolutePath());
+						fileList.add(part.getAbsolutePath());
 					}
 				} else {
-					filelist.clear();
+					fileList.clear();
 				}
 			}
-			System.out.println(filelist.toString());
-			os.write((filelist.toString()).getBytes("utf-8"));
-			os.flush();
+			System.out.println(fileList.toString());
+			// os.write((fileList.toString()).getBytes("utf-8"));
+			// os.flush();
+			sendMessage("computer", fileList.toString());
 		} else if (command.equals("power")) {
-			DPower p = new DPower(parameter);
-			os.write((parameter).getBytes("utf-8"));
-			os.flush();
+			new DPower(parameter);
+			// os.write((parameter).getBytes("utf-8"));
+			// os.flush();
+			sendMessage("power", parameter);
 		} else if (command.equals("screenshot")) {
 			DScreenShot ss = new DScreenShot(ip);
 			ss.shot();
-			os.write(("" + ss.getFileName()).getBytes("utf-8"));
-			os.flush();
+			// os.write((ss.getFileName()).getBytes("utf-8"));
+			// os.flush();
+			sendMessage("screenshot", ss.getFileName());
 		} else if (command.equals("mouse")) {
 			DMouse m = new DMouse();
 			if (parameter.equals("3") || parameter.equals("6")) {
@@ -206,11 +227,11 @@ public class CONSOLE_MAIN {
 				kb.type(args[1].toCharArray()[0]);
 			}
 		} else if (command.equals("volume")) {
-			DVolume v = new DVolume(parameter);
+			new DVolume(parameter);
 		} else if (command.equals("bright")) {
-			DBright b = new DBright(parameter);
+			new DBright(parameter);
 		} else if (command.equals("remote")) {
-			DRemote ss = new DRemote(parameter);
+			new DRemote(parameter);
 		} else if (command.equals("file")) {
 			String args[] = parameter.split("/");
 			System.out.println(args[args.length - 1]);
@@ -221,10 +242,135 @@ public class CONSOLE_MAIN {
 				}
 			}).start();
 		}
+		// else if (command.equals("talk")) {
+		// System.out.print(parameter);
+		// for (Socket item : socketList) {
+		// OutputStream itemOs = item.getOutputStream();
+		// itemOs.write(("" + parameter).getBytes("utf-8"));
+		// }
+		// }
 		os.flush();
 	}
 
+	public void sendMessage(String command, String parameter) {
+		if (os != null) {
+			try {
+				JSONObject jb = new JSONObject();
+				jb.put("command", command);
+				jb.put("parameter", parameter);
+				System.out.println("发送成功:" + jb.toString());
+				os.write((jb.toString() + "\n").getBytes("utf-8"));
+				os.flush();
+			} catch (Exception e) {
+				System.out.println("发送异常:" + e.getMessage());
+			}
+		}
+	}
+
+	public static boolean makeDirs(String folderName) {
+		if (folderName == null || folderName.isEmpty()) {
+			return false;
+		}
+		File folder = new File(folderName);
+		return (folder.exists() && folder.isDirectory()) ? true : folder
+				.mkdirs();
+	}
+
+	class PrintThread extends Thread {
+
+		public PrintThread() {
+			start();
+		}
+
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(10);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (isPrint == true) {
+					String msg = messageList.getFirst();
+					for (ServerThread item : threadsList) {
+						System.out.println(msg);
+						item.sendMessage(msg);
+					}
+					synchronized (messageList) {
+						messageList.removeFirst();
+					}
+					isPrint = messageList.size() > 0 ? true : false;
+				}
+			}
+		}
+	}
+
+	class ServerThread extends Thread {
+
+		private Socket client;
+		private BufferedReader br;
+		int first = 1;
+
+		public ServerThread(Socket socket) {
+			try {
+				client = socket;
+				client.getOutputStream();
+				br = new BufferedReader(new InputStreamReader(
+						socket.getInputStream(), "utf-8"));
+				start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void pushMessage(String msg) {
+			synchronized (messageList) {
+				messageList.add(msg);
+			}
+			isPrint = true;
+		}
+
+		public void sendMessage(String msg) {
+			// os.write((msg + "\n").getBytes("utf-8"));
+			// os.flush();
+			CONSOLE_MAIN.this.sendMessage("talk", msg);
+		}
+
+		public void run() {
+			try {
+				while (true) {
+					String msg = br.readLine();
+					System.out.println("接收成功:" + msg);
+					JSONTokener jt = new JSONTokener(msg);
+					JSONObject jb = (JSONObject) jt.nextValue();
+					String command = jb.getString("command");
+					String paramet = jb.getString("parameter");
+					if (!msg.contains("talk")) {
+						AnalyzeCode(command, paramet);
+					} else {
+						if (first == 1) {
+							threadsList.add(this);
+							first--;
+						}
+						this.pushMessage(paramet);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					client.close();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				threadsList.remove(this);
+			}
+		}
+	}
+
 	public static void main(String[] args) throws IOException, JSONException {
-		CONSOLE_MAIN main = new CONSOLE_MAIN();
+		if (makeDirs(".\\screenshot") && makeDirs(".\\download")
+				&& makeDirs(".\\inetaddress")) {
+			new CONSOLE_MAIN();
+		}
 	}
 }

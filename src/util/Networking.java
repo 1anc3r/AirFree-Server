@@ -4,6 +4,7 @@ import java.io.*;
 
 public class Networking {
 	static final int BUFFER_SIZE = 1048576;
+	private static Socket client;
 
 	// Reads in all data that can be stuffed into a buffer
 	private static int read_chunk(InputStream input, ByteArrayOutputStream bytes, byte[] buffer) throws IOException {
@@ -55,7 +56,7 @@ public class Networking {
 	}
 
 	public static void do_write(String host, int port, String inname) throws IOException {
-		Socket client = new Socket(host, port);
+		client = new Socket(host, port);
 		DataOutputStream ds = new DataOutputStream(client.getOutputStream());
 		File input = new File(inname);
 
