@@ -9,10 +9,10 @@ A few months ago, I began to code this poject which can transfer commands and fi
 The name of this poject isn't called AirFree initially, because AirFree and Alfred homonym, and Alfred is the name of Batman's old housekeeper, I hope this poject can help us as Alfred help Bruce Wayne. 
 
 ## Link:
-Blog: [http://www.1anc3r.me](http://www.1anc3r.me)
-Github: [https://github.com/1anc3r](https://github.com/1anc3r)
-AirFree-Client Downloads: [AirFree-Client.apk](http://o7gy5l0ax.bkt.clouddn.com/AirFree-Client.apk)
-AirFree-Server Downloads: [AirFree-Server.exe](http://pan.baidu.com/s/1pKDmnb1)
+* Blog: [http://www.1anc3r.me](http://www.1anc3r.me)
+* Github: [https://github.com/1anc3r](https://github.com/1anc3r)
+* AirFree-Client Downloads: [AirFree-Client.apk](http://o7gy5l0ax.bkt.clouddn.com/AirFree-Client.apk)
+* AirFree-Server Downloads: [AirFree-Server.exe](http://pan.baidu.com/s/1pKDmnb1)
 
 ## How to Use:
 1. Android-phone and windows-pc connect to the same Wi-Fi, or android-phone / windows-pc connect to windows-pc / android-phone 's hotspot, then open AirFree-Server and AirFree-Client.
