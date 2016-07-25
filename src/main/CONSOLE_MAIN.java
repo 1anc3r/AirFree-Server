@@ -168,7 +168,9 @@ public class CONSOLE_MAIN {
 			System.out.println(fileList.toString());
 			// os.write((fileList.toString()).getBytes("utf-8"));
 			// os.flush();
-			sendMessage("computer", fileList.toString());
+			if (!parameter.contains("iwanna:")) {
+				sendMessage("computer", fileList.toString());
+			}
 		} else if (command.equals("power")) {
 			new DPower(parameter);
 			// os.write((parameter).getBytes("utf-8"));
@@ -223,12 +225,6 @@ public class CONSOLE_MAIN {
 					SwingUtilities.invokeLater(readRun);
 				}
 			}).start();
-		} else if (command.equals("talk")) {
-			System.out.print(parameter);
-			for (Socket item : socketList) {
-				OutputStream itemOs = item.getOutputStream();
-				itemOs.write(("" + parameter).getBytes("utf-8"));
-			}
 		}
 		os.flush();
 	}
