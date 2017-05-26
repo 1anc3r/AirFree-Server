@@ -35,7 +35,7 @@ AirFree是一款通过Android手机轻松访问、控制电脑的远程协助应
 
 <img src="http://o7gy5l0ax.bkt.clouddn.com/2016-07-24%2019%2030%2005.png" width = "290" height = "30" alt=""/>
 <img src="http://o7gy5l0ax.bkt.clouddn.com/2016-07-24%2019%2027%2041.png" width = "218" height = "283" alt=""/>
-<img src="http://o7gy5l0ax.bkt.clouddn.com/1475060110.png" width = "218" height = "283" alt=""/>
+<img src="http://o7gy5l0ax.bkt.clouddn.com/1475060110.png" width = "218" height = "218" alt=""/>
 
 ## 关于
 ### 组织
