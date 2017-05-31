@@ -1,5 +1,7 @@
 package main;
 
+import java.awt.TrayIcon;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.*;
@@ -7,12 +9,14 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileSystemView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import func.DBright;
+import func.DComputerInfo;
 import func.DKeyBoard;
 import func.DMouse;
 import func.DPower;
@@ -24,6 +28,7 @@ import util.Networking;
 public class CONSOLE_MAIN {
 
 	private String ip = "";
+	private TrayIcon trayIcon;
 	private OutputStream os;
 	private static ServerSocket serverSocket;
 	public static ArrayList<Socket> socketList = new ArrayList<Socket>();
@@ -40,8 +45,8 @@ public class CONSOLE_MAIN {
 	private static LinkedList<String> messageList = new LinkedList<>();
 	private static List<ServerThread> threadsList = new ArrayList<>();
 
-	public CONSOLE_MAIN() throws IOException, JSONException {
-
+	public CONSOLE_MAIN(TrayIcon trayIcon) throws IOException, JSONException {
+		this.trayIcon = trayIcon;
 		readRun = (new Runnable() {
 			public void run() {
 				readName = ".\\download\\" + readName;
@@ -138,9 +143,14 @@ public class CONSOLE_MAIN {
 			throws IOException {
 		if (command.equals("link")) {
 			ip = parameter;
+			trayIcon.displayMessage("远程设备已接入", "远程设备IP:" + ip, MessageType.INFO);
 		} else if (command.equals("computer")) {
 			fileList.clear();
 			if (parameter.equals("this PC")) {
+				File desktopDir = FileSystemView.getFileSystemView()
+						.getHomeDirectory();
+				String desktopPath = desktopDir.getAbsolutePath();
+				fileList.add(desktopPath);
 				File[] parts = File.listRoots();
 				for (File part : parts) {
 					fileList.add(part.getAbsolutePath());
@@ -206,9 +216,9 @@ public class CONSOLE_MAIN {
 			String args[] = parameter.split(":");
 			System.out.println(args[1]);
 			if (args[1].contains("67")) {
-				kb.keyBoardPress(KeyEvent.VK_BACK_SPACE);
+				kb.keyPress(KeyEvent.VK_BACK_SPACE);
 			} else {
-				kb.type(args[1].toCharArray()[0]);
+				kb.type(args[1]);
 			}
 		} else if (command.equals("volume")) {
 			new DVolume(parameter);
@@ -225,6 +235,12 @@ public class CONSOLE_MAIN {
 					SwingUtilities.invokeLater(readRun);
 				}
 			}).start();
+		} else if (command.equals("info")) {
+			DComputerInfo di = new DComputerInfo();
+			sendMessage("info", di.getStr());
+		} else if (command.equals("sms")) {
+			String args[] = parameter.split(":");
+			trayIcon.displayMessage(args[0] + ":", args[1], MessageType.INFO);
 		}
 		os.flush();
 	}
@@ -313,7 +329,6 @@ public class CONSOLE_MAIN {
 				// os_.write((msg).getBytes("utf-8"));
 				if (os_ != null) {
 					try {
-						JSONObject jb_ = new JSONObject();
 						System.out.println("发送成功:"
 								+ "{\"command\":\"talk\",\"parameter\":\""
 								+ msg + "\"}");
@@ -363,13 +378,6 @@ public class CONSOLE_MAIN {
 				}
 				threadsList.remove(this);
 			}
-		}
-	}
-
-	public static void main(String[] args) throws IOException, JSONException {
-		if (makeDirs(".\\screenshot") && makeDirs(".\\download")
-				&& makeDirs(".\\inetaddress")) {
-			new CONSOLE_MAIN();
 		}
 	}
 }

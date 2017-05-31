@@ -2,10 +2,17 @@ package main;
 
 import java.awt.Color;
 import java.awt.SystemTray;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -35,9 +42,9 @@ public class GUI_MAIN extends JFrame {
 	private JPanel mainPanel;
 	private JLabel iptextLabel;
 	private JLabel qrcodeLabel;
-	private TrayIcon trayIcon;
+	private static TrayIcon trayIcon;
 	private String text = "";
-	private Image image = new ImageIcon(".\\resources\\paper.png").getImage(); 
+	private Image image = new ImageIcon(".\\resources\\paper.png").getImage();
 
 	public GUI_MAIN() {
 		super("AirFree");
@@ -51,6 +58,10 @@ public class GUI_MAIN extends JFrame {
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+
+			public void windowIconified(WindowEvent e) {
 				setVisible(false);
 			}
 		});
@@ -60,11 +71,12 @@ public class GUI_MAIN extends JFrame {
 		mainPanel = new JPanel();
 		mainPanel.setBackground(Color.WHITE);
 		try {
-			InetAddress ip;
-			ip = InetAddress.getLocalHost();
-			text = ip.getHostAddress();
-			QRCodeUtil
-					.encode(text, "", ".\\inetaddress\\", text + ".png", true);
+			// System.out.println(getLocalHostAddr());
+			// InetAddress ip;
+			// ip = InetAddress.getLocalHost();
+			// text = ip.getHostAddress();
+			text = getLocalHostAddr();
+			QRCodeUtil.encode(text, "", ".\\inetaddress\\", text + ".png", true);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -135,6 +147,13 @@ public class GUI_MAIN extends JFrame {
 		MenuItem exit = new MenuItem("    ÍË³ö");
 		exit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ex) {
+				try {
+					// Runtime.getRuntime().exec(
+					// "taskkill /f /im RemoteDesktop.exe");
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				System.exit(0);
 			}
 		});
@@ -173,8 +192,68 @@ public class GUI_MAIN extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) throws IOException, JSONException {
+	public static boolean findRemoteDesktop() {
+		BufferedReader bufferedReader = null;
+		try {
+			Process proc = Runtime.getRuntime()
+					.exec("TASKLIST /FI \"IMAGENAME eq RemoteDesktop.exe\" /FI \"STATUS eq running");
+			bufferedReader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null) {
+				if (line.contains("RemoteDesktop.exe")) {
+					return true;
+				}
+			}
+			return false;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		} finally {
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public String getLocalHostAddr() {
+		Enumeration<?> enum0;
+		Vector<String> ipTexts = new Vector<String>();
+		String ipText = null;
+		InetAddress inetAddr = null;
+		try {
+			enum0 = NetworkInterface.getNetworkInterfaces();
+			while (enum0.hasMoreElements()) {
+				NetworkInterface ni = (NetworkInterface) enum0.nextElement();
+				Enumeration<?> enum1 = ni.getInetAddresses();
+				while (enum1.hasMoreElements()) {
+					inetAddr = (InetAddress) enum1.nextElement();
+					ipTexts.add(inetAddr.toString());
+					if (inetAddr != null && inetAddr instanceof Inet4Address) {
+						String hostAddr = inetAddr.getHostAddress();
+						if (!hostAddr.equals("127.0.0.1") && !hostAddr.equals("/127.0.0.1")) {
+							ipText = inetAddr.toString().split("[/]")[1];
+							return ipText;
+						}
+					}
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static void main(String[] args) throws IOException, JSONException, InterruptedException {
+		 if (!findRemoteDesktop()) {
+			 Runtime.getRuntime().exec("cmd /c start .\\RemoteDesktop.exe");
+		 } else {
+			 Runtime.getRuntime().exec("cmd /c start .\\RemoteDesktop.vbs");
+		 }
 		new GUI_MAIN();
-		new CONSOLE_MAIN();
+		new CONSOLE_MAIN(trayIcon);
 	}
 }
